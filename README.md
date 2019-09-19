@@ -17,3 +17,30 @@ Anonymous Contributor — 1023 views
 3.  On which days did more than 1% of requests lead to errors? 
 Example:
 July 29, 2016 — 2.5% errors
+
+Requirements:
+=============
+
+1. Make sure you have python 2.7 installed.
+2. psql should be installed with news database.
+
+
+Output:
+=======
+
+Output of report will displayed on console, as well creates report file with
+".txt" format in same directory.
+
+1. 3_popular_articles.txt
+2. popular_author.txt
+3. day_on_which_more_request_errors.txt
+
+Execute:
+========
+
+To execute this report.
+
+1. Make sure you create new log_analysis directory.
+2. git clone this repo inside log_analysis directory.
+3. Run "python log_analysis.py". 
+4. Report log should be created in same directory.

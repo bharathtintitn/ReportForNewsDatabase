@@ -1,4 +1,4 @@
-# This module runs on python 2.7
+#!/usr/bin/env python2.7
 '''This module will generate report for news database in psql. '''
 import datetime
 import psycopg2
@@ -105,6 +105,18 @@ def day_with_highest_request_error(db_connection):
 if __name__ == "__main__":
 
     report = ReportingTool('news')
+    print "\n\n"
+    print "What are the most popular three articles of all time?"
+    print "\n"
     three_popular_articles(report)
+    print "\n"
+    print "***************************"
+    print "\n"
+    print "Who are the most popular article authors of all time?"
     popular_author(report)
+    print "\n"
+    print "***************************"
+    print "\n"
+    print "On which days did more than 1% of requests lead to errors?"
     day_with_highest_request_error(report)
+    print "\n"
