@@ -3,6 +3,7 @@
 import datetime
 import psycopg2
 
+
 class ReportingTool(object):
     '''Connect new db and fetch report.'''
     def __init__(self, db_name):
@@ -22,6 +23,7 @@ class ReportingTool(object):
         conn.close()
         return rows
 
+
 def create_report(file_name, message):
     '''This method create a file and adds message.'''
 
@@ -29,13 +31,14 @@ def create_report(file_name, message):
         for line in message:
             file_pointer.write(line + '\n')
 
+
 def three_popular_articles(db_connection):
     '''Fetch top 3 popular articles from db.'''
     query = '''select num, title, author
-            from (select count(*) num, path 
+            from (select count(*) num, path
                   from log
-                  group by path 
-                  order by num Desc 
+                  group by path
+                  order by num Desc
                   limit 10) l, articles a
             where l.path = '/article/' || a.slug
             limit 3;'''
@@ -43,12 +46,11 @@ def three_popular_articles(db_connection):
     message = []
     result = db_connection.execute_query(query)
     for row in result:
-        #print "row: ", row[1], "count:", row[0]
         text = '"' + row[1] + '"' + '-- ' + str(row[0]) + ' views'
         print text
         message.append(text)
     create_report('3_popular_articles', message)
-    #self.close_db_connection(conn)
+
 
 def popular_author(db_connection):
     '''
@@ -74,17 +76,20 @@ def popular_author(db_connection):
         print text
     create_report('popular_author', message)
 
+
 def day_with_highest_request_error(db_connection):
     '''
     Method returns day with most http failures.
     '''
     query = '''
-        select t.count request, l.count failed, l.date, (t.count/100) percentage from
+        select t.count request, l.count failed, l.date,
+        (t.count/100) percentage,
+        round(((l.count) * 100) ::numeric / t.count, 2) from
         (select count(*) count , date from
         (select status, path, cast(time as date) date from log) a
         group by date) t,
-        (select count(*) count, date 
-        from (select status, path, cast(time as date) date 
+        (select count(*) count, date
+        from (select status, path, cast(time as date) date
         from log where status = '404 NOT FOUND') b
         group by date) l
         where l.date = t.date
@@ -95,8 +100,7 @@ def day_with_highest_request_error(db_connection):
     for row in result:
         date = datetime.datetime.strptime(str(row[2]), '%Y-%m-%d')
         date = date.strftime('%b %d, %Y')
-        percentage = (int(row[1])/float(row[0]))*100
-        text = date + ' -- ' +  str(round(percentage, 2)) + '% errors'
+        text = date + ' -- ' + str(row[4]) + '% errors'
         message.append(text)
         print text
     create_report('day_on_which_more_request_errors', message)
