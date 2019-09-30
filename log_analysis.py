@@ -11,17 +11,23 @@ class ReportingTool(object):
 
     def get_db_connection(self):
         '''get db connection.'''
-        conn = psycopg2.connect("dbname="+self.db_name)
-        return conn
+        try:
+            conn = psycopg2.connect("dbname="+self.db_name)
+            return conn
+        except psycopg2.Error as e:
+            print "Error code: ", e.DatabaseError
 
     def execute_query(self, query):
         '''execute given query and return result.'''
         conn = self.get_db_connection()
-        cur = conn.cursor()
-        cur.execute(query)
-        rows = cur.fetchall()
-        conn.close()
-        return rows
+        try:
+            cur = conn.cursor()
+            cur.execute(query)
+            rows = cur.fetchall()
+            conn.close()
+            return rows
+        except psycopg2.Error as e:
+            print "Error: ", e.pqerror
 
 
 def create_report(file_name, message):
@@ -82,7 +88,8 @@ def day_with_highest_request_error(db_connection):
     Method returns day with most http failures.
     '''
     query = '''
-        select t.count request, l.count failed, l.date,
+        select t.count request, l.count failed,
+        to_char(l.date, 'FMMonth DD, YYYY'),
         (t.count/100) percentage,
         round(((l.count) * 100) ::numeric / t.count, 2) from
         (select count(*) count , date from
@@ -98,8 +105,7 @@ def day_with_highest_request_error(db_connection):
     result = db_connection.execute_query(query)
     message = []
     for row in result:
-        date = datetime.datetime.strptime(str(row[2]), '%Y-%m-%d')
-        date = date.strftime('%b %d, %Y')
+        date = row[2]
         text = date + ' -- ' + str(row[4]) + '% errors'
         message.append(text)
         print text
